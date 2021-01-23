@@ -1,0 +1,39 @@
+library(gmodels)
+library(randomForest)
+library(caret)
+#load data
+f=Fraud_check_2_
+f
+#to check null values
+sum(is.na(f))
+#create dummy variables for $taxable income
+taxable_income=ifelse(f$Taxable.Income<=30000,"risky","good")
+taxable_income
+f=data.frame(f,taxable_income)
+f
+#neglate the unwanted columns
+f=f[,-3]
+f
+str(f)
+#seperate the data into training and testing
+f_train=f[1:400,]
+f_test=f[401:600,]
+prop.table(table(f_train$taxable_income))
+prop.table(table(f_test$taxable_income))
+f_train$taxable_income=as.factor(f_train$taxable_income)
+#build the model
+f_model=randomForest(taxable_income~.,data=f_train,ntree=70)
+#to find importance of the variable
+importance(f_model)
+#accuracy for the training model
+pred_train=predict(f_model,f_train)
+pred_train
+#ACC
+a=table(f_train$taxable_income,pred_train)
+a
+mean(pred_train==f_train$taxable_income)
+#accuracy for the testing model
+pred_test=predict(f_model,f_test)
+pred_test
+#acc
+mean(pred_test==f_test$taxable_income)
